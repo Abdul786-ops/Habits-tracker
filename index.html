@@ -33,7 +33,7 @@
 
         .header h1 {
             font-size: 2.8em;
-            margin-bottom: 8px;
+            margin-bottom: 5px; /* Reduced space between title and author */
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
             font-weight: 700;
         }
@@ -43,7 +43,18 @@
             opacity: 0.9;
             font-style: italic;
             margin-bottom: 15px;
+            color: white;
         }
+
+        .header .author {
+            font-size: 1.4em;
+            margin-bottom: 10px;
+            color: white;
+            font-weight: 500;
+            opacity: 0.9;
+            font-style: italic;
+        }
+
 
         .timezone-info {
             display: inline-flex;
@@ -55,7 +66,25 @@
             backdrop-filter: blur(10px);
             font-size: 14px;
             font-weight: 500;
+            margin-top: 10px;
         }
+
+
+        /* Responsive adjustments */
+@media (max-width: 768px) {
+    .header h1 {
+        font-size: 2.2em;
+    }
+    
+    .header .author {
+        font-size: 1.2em;
+    }
+    
+    .timezone-info {
+        flex-direction: column;
+        gap: 8px;
+    }
+}
 
         /* Navigation */
         .nav-tabs {
@@ -1239,15 +1268,107 @@
         .journal-history-content {
             background: white;
             margin: 5% auto;
-            padding: 35px;
+            padding: 30px;
             border-radius: 20px;
             width: 90%;
-            max-width: 800px;
+            max-width: 900px;
             max-height: 80vh;
             overflow-y: auto;
             box-shadow: 0 25px 50px rgba(0,0,0,0.3);
             animation: modalSlide 0.3s ease;
         }
+
+        .journal-filter-controls {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+
+    .journal-filter {
+    padding: 10px 15px;
+    border: 2px solid #ddd;
+    border-radius: 25px;
+    font-size: 14px;
+    flex: 1;
+    min-width: 150px;
+}
+
+.journal-entries-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.journal-entry {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 15px;
+    border-left: 4px solid #e67e22;
+    transition: all 0.3s ease;
+}
+
+.journal-entry:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.journal-entry-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-weight: 600;
+    color: #2c3e50;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.journal-entry-date {
+    font-weight: 700;
+    color: #e67e22;
+}
+
+.journal-entry-type {
+    background: #e67e22;
+    color: white;
+    padding: 3px 10px;
+    border-radius: 15px;
+    font-size: 12px;
+}
+
+.journal-entry-content {
+    margin-bottom: 10px;
+    white-space: pre-wrap;
+    line-height: 1.6;
+}
+
+.journal-entry-tags {
+    font-size: 12px;
+    color: #666;
+    margin-top: 10px;
+}
+
+.journal-entry-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.journal-word-count {
+    font-size: 12px;
+    color: #666;
+}
+
+@media (max-width: 768px) {
+    .journal-history-content {
+        padding: 20px;
+    }
+    
+    .journal-filter {
+        flex: 100%;
+    }
+}
 
         .journal-entry {
             background: #f8f9fa;
@@ -1446,8 +1567,9 @@
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <h1>🚀 Elite Life Mastery System By: Kevin Lisboa</h1>
-    <p class="tagline">"HIGH PERFORMANCE isn't luck. It's a LEARNABLE set of habits!" - Kevin Lisboa</p>
+            <h1>🚀 Elite Life Mastery System</h1>
+            <p class="author">By: Kevin Lisboa</p>
+            <p class="tagline">"HIGH PERFORMANCE isn't luck. It's a LEARNABLE set of habits!"</p>
             <div class="timezone-info">
                 <span id="currentTime">🕐 Loading...</span>
                 <span id="currentDate">📅 Loading...</span>
@@ -1764,15 +1886,35 @@ My plan if this happens: _______________"></textarea>
     </div>
 
     <!-- Journal History Modal -->
-    <div id="journalHistoryModal" class="journal-history-modal">
-        <div class="journal-history-content">
-            <h3 class="modal-title">📚 Journal History</h3>
-            <div id="journalHistoryEntries"></div>
-            <div class="form-buttons" style="margin-top: 20px;">
-                <button class="btn btn-primary" onclick="closeJournalHistoryModal()">Close</button>
-            </div>
+   <div id="journalHistoryModal" class="journal-history-modal">
+    <div class="journal-history-content">
+        <h3 class="modal-title">📚 Journal History</h3>
+        
+        <div class="journal-filter-controls">
+            <select id="journalFilterType" class="journal-filter">
+                <option value="all">All Journal Types</option>
+                <option value="morning">🌅 Morning Pages</option>
+                <option value="gratitude">🙏 Gratitude</option>
+                <option value="learning">📚 Learning Log</option>
+                <option value="breakthrough">💡 Breakthroughs</option>
+                <option value="free">✍️ Free Write</option>
+            </select>
+            
+            <input type="text" id="journalSearch" class="journal-filter" placeholder="Search entries...">
+            
+            <select id="journalFilterMonth" class="journal-filter">
+                <option value="all">All Months</option>
+                <!-- Will be populated by JavaScript -->
+            </select>
+        </div>
+        
+        <div id="journalHistoryEntries" class="journal-entries-container"></div>
+        
+        <div class="form-buttons" style="margin-top: 20px;">
+            <button class="btn btn-primary" onclick="closeJournalHistoryModal()">Close</button>
         </div>
     </div>
+</div>
 
     <!-- Edit Journal Entry Modal -->
     <div id="editJournalModal" class="modal">
@@ -1798,7 +1940,7 @@ My plan if this happens: _______________"></textarea>
 
     <script>
         // Core Application Data
-        const appData = {
+         const appData = {
             habits: {
                 clarity: {
                     name: "Seek Clarity",
@@ -1860,8 +2002,14 @@ My plan if this happens: _______________"></textarea>
             tomorrowPlans: {},
             journalEntries: {},
             journalTags: [],
-            lastResetDate: getDateKey(new Date()) // Track when habits were last reset
+            lastResetDate: getDateKey(new Date()),
+            analytics: {
+                weekly: {},
+                monthly: {},
+                yearly: {}
+            }
         };
+
 
         // Enhanced Coaching Prompts
         const reflectionPrompts = {
@@ -1896,10 +2044,10 @@ My plan if this happens: _______________"></textarea>
         let currentlyEditingJournalEntry = null;
 
         // Application Initialization
-        function initializeApp() {
+       function initializeApp() {
             try {
+                loadData(); // Load data first
                 checkAndResetHabits();
-                loadData();
                 updateTimezone();
                 renderDailyTracker();
                 renderWeeklyReview();
@@ -1911,7 +2059,12 @@ My plan if this happens: _______________"></textarea>
                 setupJournalListeners();
                 setInterval(updateTimezone, 60000);
                 setInterval(saveData, 30000);
-                setInterval(checkAndResetHabits, 3600000); // Check every hour for date change
+                setInterval(checkAndResetHabits, 3600000);
+                
+                // Set up beforeunload to ensure data is saved when closing
+                window.addEventListener('beforeunload', function(e) {
+                    saveData();
+                });
             } catch (error) {
                 console.error('App initialization error:', error);
             }
@@ -2230,57 +2383,120 @@ My plan if this happens: _______________"></textarea>
         }
 
         function saveJournal() {
-    try {
-        const today = getDateKey(new Date());
-        
-        if (!appData.journalEntries[today]) {
-            appData.journalEntries[today] = {};
-        }
-        
-        const journalTypes = ['morning', 'gratitude', 'learning', 'breakthrough', 'free'];
-        let saveCount = 0;
-        
-        journalTypes.forEach(type => {
-            const contentElement = document.getElementById(`${type}Journal`);
-            const tagsElement = document.getElementById(`${type}Tags`);
-            
-            if (contentElement && tagsElement) {
-                const content = contentElement.value;
-                const tags = tagsElement.value;
+            try {
+                const today = getDateKey(new Date());
                 
-                if (content.trim()) {
-                    const words = content.trim().split(/\s+/).filter(word => word.length > 0);
-                    appData.journalEntries[today][type] = {
-                        content: content,
-                        tags: tags.split(',').map(tag => tag.trim()).filter(tag => tag),
-                        wordCount: words.length,
-                        timestamp: new Date().toISOString()
+                if (!appData.journalEntries[today]) {
+                    appData.journalEntries[today] = {};
+                }
+                
+                const journalTypes = ['morning', 'gratitude', 'learning', 'breakthrough', 'free'];
+                let saveCount = 0;
+                
+                journalTypes.forEach(type => {
+                    const contentElement = document.getElementById(`${type}Journal`);
+                    const tagsElement = document.getElementById(`${type}Tags`);
+                    
+                    if (contentElement && tagsElement) {
+                        const content = contentElement.value;
+                        const tags = tagsElement.value;
+                        
+                        if (content.trim()) {
+                            const words = content.trim().split(/\s+/).filter(word => word.length > 0);
+                            appData.journalEntries[today][type] = {
+                                content: content,
+                                tags: tags.split(',').map(tag => tag.trim()).filter(tag => tag),
+                                wordCount: words.length,
+                                timestamp: new Date().toISOString()
+                            };
+                            
+                            // Add tags to global tag array
+                            const tagArray = tags.split(',').map(tag => tag.trim()).filter(tag => tag);
+                            tagArray.forEach(tag => {
+                                if (!appData.journalTags.includes(tag)) {
+                                    appData.journalTags.push(tag);
+                                }
+                            });
+                            
+                            saveCount++;
+                        }
+                    }
+                });
+                
+                // Update analytics
+                updateAnalytics();
+                
+                saveData();
+                showSaveIndicator();
+                
+                if (saveCount > 0) {
+                    alert(`📝 ${saveCount} journal entries saved! Your thoughts are captured for growth and reflection.`);
+                }
+            } catch (error) {
+                console.error('Error saving journal:', error);
+            }
+        }
+
+
+// New function to update analytics
+        function updateAnalytics() {
+            try {
+                const today = new Date();
+                const weekDates = getLast7Days();
+                const monthDates = getMonthDates(today);
+                const year = today.getFullYear();
+                
+                // Weekly analytics
+                const weekKey = getWeekKey(today);
+                if (!appData.analytics.weekly[weekKey]) {
+                    appData.analytics.weekly[weekKey] = {
+                        startDate: weekDates[0],
+                        endDate: weekDates[weekDates.length - 1],
+                        averageScore: calculateWeeklyAverage(),
+                        habitScores: {}
                     };
                     
-                    // Add tags to global tag array
-                    const tagArray = tags.split(',').map(tag => tag.trim()).filter(tag => tag);
-                    tagArray.forEach(tag => {
-                        if (!appData.journalTags.includes(tag)) {
-                            appData.journalTags.push(tag);
-                        }
+                    Object.keys(appData.habits).forEach(habitKey => {
+                        appData.analytics.weekly[weekKey].habitScores[habitKey] = 
+                            calculateWeeklyHabitScore(habitKey, weekDates);
                     });
-                    
-                    saveCount++;
                 }
+                
+                // Monthly analytics
+                const monthKey = today.getFullYear() + '-' + (today.getMonth() + 1);
+                if (!appData.analytics.monthly[monthKey]) {
+                    appData.analytics.monthly[monthKey] = {
+                        month: today.getMonth(),
+                        year: today.getFullYear(),
+                        averageScore: calculateMonthlyAverage(monthDates),
+                        habitScores: {},
+                        highPerfDays: monthDates.filter(date => calculateDayScore(date) >= 80).length
+                    };
+                    
+                    Object.keys(appData.habits).forEach(habitKey => {
+                        appData.analytics.monthly[monthKey].habitScores[habitKey] = 
+                            calculateMonthlyHabitScore(habitKey, monthDates);
+                    });
+                }
+                
+                // Yearly analytics
+                if (!appData.analytics.yearly[year]) {
+                    appData.analytics.yearly[year] = calculateYearlyMetrics(year);
+                }
+                
+            } catch (error) {
+                console.error('Error updating analytics:', error);
             }
-        });
-        
-        saveData();
-        showSaveIndicator();
-        
-        if (saveCount > 0) {
-            alert(`📝 ${saveCount} journal entries saved! Your thoughts are captured for growth and reflection.`);
         }
-    } catch (error) {
-        console.error('Error saving journal:', error);
-    }
-}
-        
+
+
+// Helper function to get week key
+        function getWeekKey(date) {
+            const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
+            const pastDaysOfYear = (date - firstDayOfYear) / 86400000;
+            return date.getFullYear() + '-W' + Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
+        }
+
 
        function loadJournalEntries() {
     try {
@@ -2310,65 +2526,170 @@ My plan if this happens: _______________"></textarea>
     }
 }
 
+        // Enhanced journal history view
         function showJournalHistory() {
             try {
-                const container = document.getElementById('journalHistoryEntries');
-                container.innerHTML = '';
+                const modal = document.getElementById('journalHistoryModal');
+                modal.style.display = 'block';
                 
-                // Sort journal entries by date (newest first)
-                const sortedDates = Object.keys(appData.journalEntries).sort((a, b) => {
-                    return new Date(b) - new Date(a);
-                });
+                // Initialize filters
+                initJournalFilters();
                 
-                sortedDates.forEach(date => {
-                    const dateObj = new Date(date);
-                    const dateFormatted = dateObj.toLocaleDateString([], { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-                    
-                    const dateHeader = document.createElement('h4');
-                    dateHeader.style.margin = '15px 0 10px';
-                    dateHeader.style.color = '#2c3e50';
-                    dateHeader.textContent = dateFormatted;
-                    container.appendChild(dateHeader);
-                    
-                    const dayEntries = appData.journalEntries[date];
-                    Object.entries(dayEntries).forEach(([type, entry]) => {
-                        const entryDiv = document.createElement('div');
-                        entryDiv.className = 'journal-entry';
-                        
-                        const typeTitles = {
-                            morning: '🌅 Morning Pages',
-                            gratitude: '🙏 Gratitude',
-                            learning: '📚 Learning Log',
-                            breakthrough: '💡 Breakthroughs',
-                            free: '✍️ Free Write'
-                        };
-                        
-                        entryDiv.innerHTML = `
-                            <div class="journal-entry-header">
-                                <span>${typeTitles[type] || type}</span>
-                                <span>${entry.wordCount} words</span>
-                            </div>
-                            <div class="journal-entry-content">${entry.content.replace(/\n/g, '<br>')}</div>
-                            ${entry.tags && entry.tags.length > 0 ? 
-                                `<div class="journal-entry-tags">Tags: ${entry.tags.join(', ')}</div>` : ''}
-                            <div class="journal-entry-actions">
-                                <button class="edit-journal-btn" onclick="editJournalEntry('${date}', '${type}')">Edit</button>
-                            </div>
-                        `;
-                        
-                        container.appendChild(entryDiv);
-                    });
-                });
-                
-                if (sortedDates.length === 0) {
-                    container.innerHTML = '<p style="text-align: center; color: #666;">No journal entries found. Start writing to see your history here!</p>';
-                }
-                
-                document.getElementById('journalHistoryModal').style.display = 'block';
+                // Load entries
+                filterJournalEntries();
             } catch (error) {
                 console.error('Error showing journal history:', error);
             }
         }
+
+function initJournalFilters() {
+    try {
+        // Populate month filter
+        const monthFilter = document.getElementById('journalFilterMonth');
+        monthFilter.innerHTML = '<option value="all">All Months</option>';
+        
+        // Get all unique months from journal entries
+        const months = new Set();
+        Object.keys(appData.journalEntries).forEach(date => {
+            const dateObj = new Date(date);
+            const monthYear = `${dateObj.getFullYear()}-${dateObj.getMonth()}`;
+            months.add(monthYear);
+        });
+        
+        // Convert to array and sort newest first
+        const sortedMonths = Array.from(months).sort().reverse();
+        
+        sortedMonths.forEach(monthYear => {
+            const [year, month] = monthYear.split('-');
+            const monthName = new Date(year, month).toLocaleDateString('en', { month: 'long', year: 'numeric' });
+            monthFilter.innerHTML += `<option value="${monthYear}">${monthName}</option>`;
+        });
+        
+        // Add event listeners to filters
+        document.getElementById('journalFilterType').addEventListener('change', filterJournalEntries);
+        document.getElementById('journalFilterMonth').addEventListener('change', filterJournalEntries);
+        document.getElementById('journalSearch').addEventListener('input', filterJournalEntries);
+    } catch (error) {
+        console.error('Error initializing journal filters:', error);
+    }
+}
+
+function filterJournalEntries() {
+    try {
+        const container = document.getElementById('journalHistoryEntries');
+        const typeFilter = document.getElementById('journalFilterType').value;
+        const monthFilter = document.getElementById('journalFilterMonth').value;
+        const searchQuery = document.getElementById('journalSearch').value.toLowerCase();
+        
+        container.innerHTML = '';
+        
+        // Sort dates newest first
+        const sortedDates = Object.keys(appData.journalEntries).sort((a, b) => {
+            return new Date(b) - new Date(a);
+        });
+        
+        let hasEntries = false;
+        
+        sortedDates.forEach(date => {
+            const dateObj = new Date(date);
+            const monthYear = `${dateObj.getFullYear()}-${dateObj.getMonth()}`;
+            
+            // Skip if doesn't match month filter
+            if (monthFilter !== 'all' && monthYear !== monthFilter) return;
+            
+            const dateFormatted = dateObj.toLocaleDateString([], { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            const dayEntries = appData.journalEntries[date];
+            
+            Object.entries(dayEntries).forEach(([type, entry]) => {
+                // Skip if doesn't match type filter
+                if (typeFilter !== 'all' && type !== typeFilter) return;
+                
+                // Skip if doesn't match search query
+                if (searchQuery && !entry.content.toLowerCase().includes(searchQuery) && 
+                    !(entry.tags && entry.tags.some(tag => tag.toLowerCase().includes(searchQuery)))) {
+                    return;
+                }
+                
+                hasEntries = true;
+                
+                const typeTitles = {
+                    morning: '🌅 Morning Pages',
+                    gratitude: '🙏 Gratitude',
+                    learning: '📚 Learning Log',
+                    breakthrough: '💡 Breakthroughs',
+                    free: '✍️ Free Write'
+                };
+                
+                const entryDiv = document.createElement('div');
+                entryDiv.className = 'journal-entry';
+                
+                entryDiv.innerHTML = `
+                    <div class="journal-entry-header">
+                        <span class="journal-entry-date">${dateFormatted}</span>
+                        <span class="journal-entry-type">${typeTitles[type] || type}</span>
+                    </div>
+                    <div class="journal-entry-content">${entry.content.replace(/\n/g, '<br>')}</div>
+                    <div class="journal-entry-footer">
+                        ${entry.tags && entry.tags.length > 0 ? 
+                            `<div class="journal-entry-tags">Tags: ${entry.tags.join(', ')}</div>` : ''}
+                        <div class="journal-word-count">${entry.wordCount} words</div>
+                    </div>
+                    <div class="journal-entry-actions">
+                        <button class="edit-journal-btn" onclick="editJournalEntry('${date}', '${type}')">Edit</button>
+                    </div>
+                `;
+                
+                container.appendChild(entryDiv);
+            });
+        });
+        
+        if (!hasEntries) {
+            container.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">No matching journal entries found.</p>';
+        }
+    } catch (error) {
+        console.error('Error filtering journal entries:', error);
+    }
+}
+
+function closeJournalHistoryModal() {
+    document.getElementById('journalHistoryModal').style.display = 'none';
+}
+
+// Update your existing editJournalEntry function to refresh the view after editing
+function saveEditedJournalEntry() {
+    try {
+        if (!currentlyEditingJournalEntry) return;
+        
+        const { date, type } = currentlyEditingJournalEntry;
+        const content = document.getElementById('editJournalContent').value;
+        const tags = document.getElementById('editJournalTags').value.split(',').map(tag => tag.trim()).filter(tag => tag);
+        
+        if (!appData.journalEntries[date]) {
+            appData.journalEntries[date] = {};
+        }
+        
+        appData.journalEntries[date][type] = {
+            content: content,
+            tags: tags,
+            wordCount: content.trim().split(/\s+/).filter(word => word.length > 0).length,
+            timestamp: new Date().toISOString()
+        };
+        
+        // Update tags in global tag array
+        tags.forEach(tag => {
+            if (!appData.journalTags.includes(tag)) {
+                appData.journalTags.push(tag);
+            }
+        });
+        
+        saveData();
+        closeEditJournalModal();
+        filterJournalEntries(); // Refresh the view
+        showSaveIndicator();
+    } catch (error) {
+        console.error('Error saving edited journal entry:', error);
+    }
+}
 
         function closeJournalHistoryModal() {
             document.getElementById('journalHistoryModal').style.display = 'none';
@@ -3587,24 +3908,31 @@ function renderSeasonalAnalysis() {
         }
 
         // Data Persistence
-        function saveData() {
+       function saveData() {
             try {
-                window.appDataStore = JSON.stringify(appData);
+                localStorage.setItem('eliteLifeMasteryData', JSON.stringify(appData));
                 showSaveIndicator();
             } catch (error) {
                 console.error('Save error:', error);
             }
         }
 
-        function loadData() {
+
+       function loadData() {
             try {
-                const saved = window.appDataStore;
+                const saved = localStorage.getItem('eliteLifeMasteryData');
                 if (saved) {
                     const parsed = JSON.parse(saved);
-                    Object.assign(appData, {
-                        ...appData,
-                        ...parsed,
-                        habits: { ...appData.habits, ...parsed.habits }
+                    
+                    // Merge the loaded data with default structure
+                    Object.keys(appData).forEach(key => {
+                        if (parsed[key] !== undefined) {
+                            if (typeof appData[key] === 'object' && !Array.isArray(appData[key])) {
+                                appData[key] = {...appData[key], ...parsed[key]};
+                            } else {
+                                appData[key] = parsed[key];
+                            }
+                        }
                     });
                     
                     // Ensure arrays are properly handled
@@ -3616,11 +3944,21 @@ function renderSeasonalAnalysis() {
                     if (!appData.lastResetDate) {
                         appData.lastResetDate = getDateKey(new Date());
                     }
+                    
+                    // Initialize analytics if not present
+                    if (!appData.analytics) {
+                        appData.analytics = {
+                            weekly: {},
+                            monthly: {},
+                            yearly: {}
+                        };
+                    }
                 }
             } catch (error) {
                 console.error('Load error:', error);
             }
         }
+
 
         function showSaveIndicator() {
             try {
@@ -3699,6 +4037,8 @@ function renderSeasonalAnalysis() {
                 addNewPractice();
             }
         });
+
+           document.addEventListener('DOMContentLoaded', initializeApp);
     </script>
 </body>
 </html>
