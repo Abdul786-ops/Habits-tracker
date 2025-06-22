@@ -984,12 +984,12 @@
         }
 
         /* Insights */
-        .insights-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 25px;
-            margin-bottom: 30px;
-        }
+       .insights-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
+    margin-bottom: 50px; /* Increased margin to separate from Import/Export */
+}
 
         .insight-card {
             background: white;
@@ -1165,14 +1165,15 @@
 
         /* Wisdom Section */
         .wisdom-section {
-            margin-top: 30px;
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            padding: 25px;
-            border-radius: 16px;
-            color: white;
-            text-align: center;
-            box-shadow: 0 8px 25px rgba(240,147,251,0.3);
-        }
+    margin-top: 30px;
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    padding: 25px;
+    border-radius: 16px;
+    color: white;
+    text-align: center;
+    box-shadow: 0 8px 25px rgba(240,147,251,0.3);
+    margin-bottom: 30px; /* Added margin to separate from Import/Export */
+}
 
         .wisdom-title {
             margin-bottom: 15px;
@@ -1971,34 +1972,44 @@ My plan if this happens: _______________"></textarea>
 
         // Alert System
         function checkMissedDays() {
-            try {
-                const today = getDateKey(new Date());
-                const missedDays = [];
-                
-                // Check last 2 days individually
-                for (let daysBack = 1; daysBack <= 2; daysBack++) {
-                    const checkDate = addDays(new Date(), -daysBack);
-                    const dateKey = getDateKey(checkDate);
-                    const score = calculateDayScore(dateKey);
-                    
-                    if (score === 0) {
-                        const dayName = checkDate.toLocaleDateString([], {weekday: 'long', month: 'short', day: 'numeric'});
-                        missedDays.push({ dateKey, dayName, daysAgo: daysBack });
-                    }
-                }
-                
-                const alertsContainer = document.getElementById('alertsContainer');
-                if (!alertsContainer) return;
-                
-                if (missedDays.length > 0) {
-                    showMissedAlert(missedDays);
-                } else {
-                    showStreakBanner();
-                }
-            } catch (error) {
-                console.error('Error checking missed days:', error);
-            }
+    try {
+        const today = getDateKey(new Date());
+        const yesterday = getDateKey(addDays(new Date(), -1));
+        const dayBefore = getDateKey(addDays(new Date(), -2));
+        
+        const missedDays = [];
+        
+        // Only check if we have data for today - if not, then we might have just opened the app
+        if (!appData.dailyScores[today]) {
+            return;
         }
+        
+        // Check yesterday
+        const yesterdayScore = calculateDayScore(yesterday);
+        if (yesterdayScore === 0 && appData.dailyScores[yesterday] === undefined) {
+            const dayName = new Date(yesterday).toLocaleDateString([], {weekday: 'long', month: 'short', day: 'numeric'});
+            missedDays.push({ dateKey: yesterday, dayName, daysAgo: 1 });
+        }
+        
+        // Check day before
+        const dayBeforeScore = calculateDayScore(dayBefore);
+        if (dayBeforeScore === 0 && appData.dailyScores[dayBefore] === undefined) {
+            const dayName = new Date(dayBefore).toLocaleDateString([], {weekday: 'long', month: 'short', day: 'numeric'});
+            missedDays.push({ dateKey: dayBefore, dayName, daysAgo: 2 });
+        }
+        
+        const alertsContainer = document.getElementById('alertsContainer');
+        if (!alertsContainer) return;
+        
+        if (missedDays.length > 0) {
+            showMissedAlert(missedDays);
+        } else {
+            showStreakBanner();
+        }
+    } catch (error) {
+        console.error('Error checking missed days:', error);
+    }
+}
 
         function showMissedAlert(missedDays) {
             try {
@@ -2219,89 +2230,85 @@ My plan if this happens: _______________"></textarea>
         }
 
         function saveJournal() {
-            try {
-                const today = getDateKey(new Date());
-                
-                if (!appData.journalEntries[today]) {
-                    appData.journalEntries[today] = {};
-                }
-                
-                const journalTypes = ['morning', 'gratitude', 'learning', 'breakthrough', 'free'];
-                let saveCount = 0;
-                
-                journalTypes.forEach(type => {
-                    const contentElement = document.getElementById(`${type}Journal`);
-                    const tagsElement = document.getElementById(`${type}Tags`);
-                    
-                    if (contentElement && tagsElement) {
-                        const content = contentElement.value;
-                        const tags = tagsElement.value;
-                        
-                        if (content.trim()) {
-                            const words = content.trim().split(/\s+/).filter(word => word.length > 0);
-                            appData.journalEntries[today][type] = {
-                                content: content,
-                                tags: tags.split(',').map(tag => tag.trim()).filter(tag => tag),
-                                wordCount: words.length,
-                                timestamp: new Date().toISOString()
-                            };
-                            
-                            // Add tags to global tag array
-                            const tagArray = tags.split(',').map(tag => tag.trim()).filter(tag => tag);
-                            tagArray.forEach(tag => {
-                                if (!appData.journalTags.includes(tag)) {
-                                    appData.journalTags.push(tag);
-                                }
-                            });
-                            
-                            saveCount++;
-                            
-                            // Clear the textarea after save if configured to do so
-                            if (type === currentActiveJournalTab) {
-                                contentElement.value = '';
-                                tagsElement.value = '';
-                                const event = new Event('input');
-                                contentElement.dispatchEvent(event);
-                            }
-                        }
-                    }
-                });
-                
-                saveData();
-                showSaveIndicator();
-                alert(`📝 ${saveCount} journal entries saved! Your thoughts are captured for growth and reflection.`);
-            } catch (error) {
-                console.error('Error saving journal:', error);
-            }
+    try {
+        const today = getDateKey(new Date());
+        
+        if (!appData.journalEntries[today]) {
+            appData.journalEntries[today] = {};
         }
-
-        function loadJournalEntries() {
-            try {
-                const today = getDateKey(new Date());
-                const todayEntries = appData.journalEntries[today];
+        
+        const journalTypes = ['morning', 'gratitude', 'learning', 'breakthrough', 'free'];
+        let saveCount = 0;
+        
+        journalTypes.forEach(type => {
+            const contentElement = document.getElementById(`${type}Journal`);
+            const tagsElement = document.getElementById(`${type}Tags`);
+            
+            if (contentElement && tagsElement) {
+                const content = contentElement.value;
+                const tags = tagsElement.value;
                 
-                if (todayEntries) {
-                    Object.entries(todayEntries).forEach(([type, entry]) => {
-                        const textarea = document.getElementById(`${type}Journal`);
-                        const tagsInput = document.getElementById(`${type}Tags`);
-                        
-                        if (textarea && entry.content) {
-                            textarea.value = entry.content;
-                            
-                            // Update word count
-                            const event = new Event('input');
-                            textarea.dispatchEvent(event);
-                        }
-                        
-                        if (tagsInput && entry.tags) {
-                            tagsInput.value = entry.tags.join(', ');
+                if (content.trim()) {
+                    const words = content.trim().split(/\s+/).filter(word => word.length > 0);
+                    appData.journalEntries[today][type] = {
+                        content: content,
+                        tags: tags.split(',').map(tag => tag.trim()).filter(tag => tag),
+                        wordCount: words.length,
+                        timestamp: new Date().toISOString()
+                    };
+                    
+                    // Add tags to global tag array
+                    const tagArray = tags.split(',').map(tag => tag.trim()).filter(tag => tag);
+                    tagArray.forEach(tag => {
+                        if (!appData.journalTags.includes(tag)) {
+                            appData.journalTags.push(tag);
                         }
                     });
+                    
+                    saveCount++;
                 }
-            } catch (error) {
-                console.error('Error loading journal entries:', error);
             }
+        });
+        
+        saveData();
+        showSaveIndicator();
+        
+        if (saveCount > 0) {
+            alert(`📝 ${saveCount} journal entries saved! Your thoughts are captured for growth and reflection.`);
         }
+    } catch (error) {
+        console.error('Error saving journal:', error);
+    }
+}
+        
+
+       function loadJournalEntries() {
+    try {
+        const today = getDateKey(new Date());
+        const todayEntries = appData.journalEntries[today];
+        
+        if (todayEntries) {
+            Object.entries(todayEntries).forEach(([type, entry]) => {
+                const textarea = document.getElementById(`${type}Journal`);
+                const tagsInput = document.getElementById(`${type}Tags`);
+                
+                if (textarea && entry.content) {
+                    textarea.value = entry.content;
+                    
+                    // Update word count
+                    const event = new Event('input');
+                    textarea.dispatchEvent(event);
+                }
+                
+                if (tagsInput && entry.tags) {
+                    tagsInput.value = entry.tags.join(', ');
+                }
+            });
+        }
+    } catch (error) {
+        console.error('Error loading journal entries:', error);
+    }
+}
 
         function showJournalHistory() {
             try {
@@ -2509,54 +2516,54 @@ My plan if this happens: _______________"></textarea>
             return lowestHabit;
         }
 
-        function saveReflection() {
-            try {
-                const today = getDateKey(new Date());
-                const reflection1 = document.getElementById('reflection1').value;
-                const reflection2 = document.getElementById('reflection2').value;
-                const reflection3 = document.getElementById('reflection3').value;
-                
-                const reflectionData = {
-                    reflection1,
-                    reflection2,
-                    reflection3,
-                    date: today
-                };
-                
-                appData.reflections[today] = JSON.stringify(reflectionData);
-                saveData();
-                showSaveIndicator();
-            } catch (error) {
-                console.error('Error saving reflection:', error);
-            }
-        }
+       function saveReflection() {
+    try {
+        const today = getDateKey(new Date());
+        const reflection1 = document.getElementById('reflection1').value;
+        const reflection2 = document.getElementById('reflection2').value;
+        const reflection3 = document.getElementById('reflection3').value;
+        
+        const reflectionData = {
+            reflection1,
+            reflection2,
+            reflection3,
+            date: today
+        };
+        
+        appData.reflections[today] = JSON.stringify(reflectionData);
+        saveData();
+        showSaveIndicator();
+    } catch (error) {
+        console.error('Error saving reflection:', error);
+    }
+}
 
         // Tomorrow's Performance Planning
-        function loadTomorrowPlan() {
-            try {
-                const today = getDateKey(new Date());
-                const existingPlan = appData.tomorrowPlans[today];
-                
-                if (existingPlan) {
-                    try {
-                        const planData = JSON.parse(existingPlan);
-                        document.getElementById('priorityInput').value = planData.priority || '';
-                        document.getElementById('bedtimeInput').value = planData.bedtime || '';
-                        document.getElementById('wakeupInput').value = planData.wakeup || '';
-                        document.getElementById('peakEnergyInput').value = planData.peakEnergy || '';
-                        document.getElementById('peakActivityInput').value = planData.peakActivity || '';
-                        document.getElementById('habitIntentionsInput').value = planData.habitIntentions || '';
-                        document.getElementById('obstaclesInput').value = planData.obstacles || '';
-                        document.getElementById('identityInput').value = planData.identity || '';
-                    } catch (e) {
-                        console.log('Error loading tomorrow plan:', e);
-                    }
-                }
-            } catch (error) {
-                console.error('Error loading tomorrow plan:', error);
-            }
-        }
-
+       function saveTomorrowPlan() {
+    try {
+        const today = getDateKey(new Date());
+        
+        const planData = {
+            priority: document.getElementById('priorityInput').value,
+            bedtime: document.getElementById('bedtimeInput').value,
+            wakeup: document.getElementById('wakeupInput').value,
+            peakEnergy: document.getElementById('peakEnergyInput').value,
+            peakActivity: document.getElementById('peakActivityInput').value,
+            habitIntentions: document.getElementById('habitIntentionsInput').value,
+            obstacles: document.getElementById('obstaclesInput').value,
+            identity: document.getElementById('identityInput').value,
+            date: today
+        };
+        
+        appData.tomorrowPlans[today] = JSON.stringify(planData);
+        saveData();
+        showSaveIndicator();
+        
+        alert('🔒 Tomorrow\'s high-performance plan is locked in! You\'re ready for excellence.');
+    } catch (error) {
+        console.error('Error saving tomorrow plan:', error);
+    }
+}
         function saveTomorrowPlan() {
             try {
                 const today = getDateKey(new Date());
@@ -2943,69 +2950,76 @@ My plan if this happens: _______________"></textarea>
             }
         }
 
-        function renderSeasonalAnalysis() {
-            try {
-                const container = document.getElementById('seasonalGrid');
-                const year = currentViewYear.getFullYear();
-                
-                container.innerHTML = '';
-                
-                const seasons = [
-                    { name: 'Q1 (Winter)', months: [0, 1, 2], emoji: '❄️' },
-                    { name: 'Q2 (Summer)', months: [3, 4, 5], emoji: '🌸' },
-                    { name: 'Q3 (Spring)', months: [6, 7, 8], emoji: '☀️' },
-                    { name: 'Q4 (Autumn)', months: [9, 10, 11], emoji: '🍂' }
-                ];
-                
-                // Calculate scores for each season
-                const seasonScores = seasons.map((season, index) => {
-                    let totalScore = 0;
-                    season.months.forEach(monthIndex => {
-                        const monthDate = new Date(year, monthIndex, 1);
-                        const monthDates = getMonthDates(monthDate);
-                        totalScore += calculateMonthlyAverage(monthDates);
-                    });
-                    const avgScore = Math.round(totalScore / 3);
-                    return avgScore;
-                });
-                
-                // Find best season (only if there's a clear winner)
-                const maxScore = Math.max(...seasonScores);
-                let bestSeasonIndex = -1;
-                
-                // Only mark as "best" if score > 0 and is unique highest
-                if (maxScore > 0) {
-                    const winnersCount = seasonScores.filter(score => score === maxScore).length;
-                    if (winnersCount === 1) {
-                        bestSeasonIndex = seasonScores.indexOf(maxScore);
-                    }
-                }
-                
-                // If we're viewing current year and no clear winner, highlight current season
-                if (bestSeasonIndex === -1 && year === new Date().getFullYear()) {
-                    const currentMonth = new Date().getMonth();
-                    bestSeasonIndex = Math.floor(currentMonth / 3); // 0-2=Q1, 3-5=Q2, 6-8=Q3, 9-11=Q4
-                }
-                
-                seasons.forEach((season, index) => {
-                    const card = document.createElement('div');
-                    card.className = 'season-card';
-                    if (index === bestSeasonIndex) {
-                        card.classList.add('best-season');
-                    }
-                    
-                    card.innerHTML = `
-                        <div class="season-title">${season.emoji} ${season.name}</div>
-                        <div class="season-score">${seasonScores[index]}%</div>
-                        <div class="season-label">Average Performance</div>
-                    `;
-                    
-                    container.appendChild(card);
-                });
-            } catch (error) {
-                console.error('Error rendering seasonal analysis:', error);
+
+function renderSeasonalAnalysis() {
+    try {
+        const container = document.getElementById('seasonalGrid');
+        const year = currentViewYear.getFullYear();
+        
+        container.innerHTML = '';
+        
+        const seasons = [
+            { name: 'Winter (Dec-Feb)', months: [11, 0, 1], emoji: '❄️' }, // Dec, Jan, Feb
+            { name: 'Spring (Mar-May)', months: [2, 3, 4], emoji: '🌸' },    // Mar, Apr, May
+            { name: 'Summer (Jun-Aug)', months: [5, 6, 7], emoji: '☀️' },   // Jun, Jul, Aug
+            { name: 'Fall (Sep-Nov)', months: [8, 9, 10], emoji: '🍂' }     // Sep, Oct, Nov
+        ];
+        
+        // Calculate scores for each season
+        const seasonScores = seasons.map((season, index) => {
+            let totalScore = 0;
+            season.months.forEach(monthIndex => {
+                const monthDate = new Date(year, monthIndex, 1);
+                const monthDates = getMonthDates(monthDate);
+                totalScore += calculateMonthlyAverage(monthDates);
+            });
+            const avgScore = Math.round(totalScore / 3);
+            return avgScore;
+        });
+        
+        // Find best season (only if there's a clear winner)
+        const maxScore = Math.max(...seasonScores);
+        let bestSeasonIndex = -1;
+        
+        // Only mark as "best" if score > 0 and is unique highest
+        if (maxScore > 0) {
+            const winnersCount = seasonScores.filter(score => score === maxScore).length;
+            if (winnersCount === 1) {
+                bestSeasonIndex = seasonScores.indexOf(maxScore);
             }
         }
+        
+        // If we're viewing current year and no clear winner, highlight current season
+        if (bestSeasonIndex === -1 && year === new Date().getFullYear()) {
+            const currentMonth = new Date().getMonth();
+            // Determine current season
+            if ([11, 0, 1].includes(currentMonth)) bestSeasonIndex = 0; // Winter
+            else if ([2, 3, 4].includes(currentMonth)) bestSeasonIndex = 1; // Spring
+            else if ([5, 6, 7].includes(currentMonth)) bestSeasonIndex = 2; // Summer
+            else bestSeasonIndex = 3; // Fall
+        }
+        
+        seasons.forEach((season, index) => {
+            const card = document.createElement('div');
+            card.className = 'season-card';
+            if (index === bestSeasonIndex) {
+                card.classList.add('best-season');
+            }
+            
+            card.innerHTML = `
+                <div class="season-title">${season.emoji} ${season.name}</div>
+                <div class="season-score">${seasonScores[index]}%</div>
+                <div class="season-label">Average Performance</div>
+            `;
+            
+            container.appendChild(card);
+        });
+    } catch (error) {
+        console.error('Error rendering seasonal analysis:', error);
+    }
+}
+
+
 
         function renderYearlyInsights() {
             try {
